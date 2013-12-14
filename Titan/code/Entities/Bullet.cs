@@ -37,12 +37,14 @@ namespace Titan
             base.createBody(_physics, _type);
             mBody.UserData = this;
             mBody.OnCollision += new OnCollisionEventHandler(collision);
+            mBody.CollisionCategories = Category.Cat3;
+            mBody.CollidesWith = Category.All & ~Category.Cat3;
         }
 
         public override bool collision(Fixture f1, Fixture f2, Contact contact)
         {
             this.destroy();
-            return true;
+            return false;
         }
     }
 }

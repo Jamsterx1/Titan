@@ -42,7 +42,7 @@ namespace Titan
 
         public void update()
         {
-            if (mTimer.ElapsedMilliseconds >= 8000f)
+            if (mTimer.ElapsedMilliseconds >= 5000f)
             {
                 for(int i = 0; i < mCount; i++)
                     mWorld.add(spawn());
@@ -61,7 +61,7 @@ namespace Titan
             newPos.X = mPosition.X + randX;
             newPos.Y = mPosition.Y + randY;
 
-            Enemy enemy = new Enemy(newPos, "../../resources/enemy.png", mPlayer);
+            Enemy enemy = new Enemy(newPos, "resources/enemy.png", mPlayer, mWorld);
             enemy.createBody(mPhysicsWorld, BodyType.Dynamic);
             return enemy;
         }

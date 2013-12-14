@@ -96,6 +96,7 @@ namespace Titan
             mBody.BodyType = _type;
 
             mBody.Friction = 0.15f;
+            mBody.CollisionCategories = Category.Cat1;
         }
 
         /*public virtual void input()
@@ -132,10 +133,7 @@ namespace Titan
 
         public bool isDead()
         {
-            if (mLifeState == LifeState.LifeState_Dead)
-                return true;
-            else
-                return false;
+            return mLifeState == LifeState.LifeState_Dead;
         }
     }
 }

@@ -46,7 +46,7 @@ namespace Titan
 
             for (int i = 0; i < 11; i++)
             {
-                Texture tex = new Texture("../../resources/health/health" + i + ".png");
+                Texture tex = new Texture("resources/health/health" + i + ".png");
                 mHealthBar[i] = new Sprite(tex);
 
                 Vector2f pos = new Vector2f();
@@ -61,12 +61,18 @@ namespace Titan
             base.createBody(_physics, _type);
             mBody.UserData = this;
             mBody.FixedRotation = true;
+            mBody.CollisionCategories = Category.Cat5;
+            mBody.CollidesWith = Category.All & ~Category.Cat2;
+            mBody.OnCollision += collision;
         }
 
         public override void update(RenderWindow _window)
         {
             input(_window);
             base.update(_window);
+
+            if (mHealth == 0)
+                destroy();
 
             if (ConvertUnits.ToDisplayUnits(mBody.Position.Y) > 800)
                 mBody.Position = ConvertUnits.ToSimUnits(300f, 680f);
@@ -154,10 +160,22 @@ namespace Titan
                     Vector2f aim        = new Vector2f(translated.X - mPosition.X, translated.Y - mPosition.Y);
                     double   angle      = Math.Atan2(aim.Y, aim.X);
 
-                    mWorld.createBullet(mPosition, angle);
+                    mWorld.createBullet(mPosition, this, "resources/bullet.png", angle);
                     mShoot.Restart();
                 }
             }
+        }
+
+        public override bool collision(Fixture f1, Fixture f2, FarseerPhysics.Dynamics.Contacts.Contact contact)
+        {
+            if (f2.CollisionCategories == Category.Cat3)
+            {
+                if (!mInvicible && mHealth > 0)
+                    mHealth--;
+
+                Console.WriteLine("Health = " + mHealth);
+            }
+            return true;
         }
 
         public void invincible()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using SFML.Graphics;
 using SFML.Window;
 
@@ -28,11 +29,19 @@ namespace Titan
         public AIState  mState;
         public Entity   mTarget;
         public Vector2f mMovement;
-        public Random rand = new Random();
 
-        public Enemy(Vector2f _position, String _file, Entity _target, uint _layer = 2)
+        public  Random    rand   = new Random();
+        private Stopwatch mTimer = new Stopwatch();
+        private Stopwatch mDie = new Stopwatch();
+        private GameWorld mWorld;
+
+        public Enemy(Vector2f _position, String _file, Entity _target, GameWorld _world, uint _layer = 2)
         {
             create(_position, _file, _layer);
+            mTimer.Start();
+            mDie.Start();
+
+            mWorld      = _world;
             mEntityType = EntityType.Enemy;
             mState      = AIState.Chase;
             mTarget     = _target;
@@ -46,6 +55,8 @@ namespace Titan
             mBody.FixedRotation = true;
             mBody.IgnoreCollisionWith(mTarget.mBody);
             mBody.OnCollision += collision;
+            mBody.CollisionCategories = Category.Cat2;
+            mBody.CollidesWith = Category.All &~ Category.Cat1;
         }
 
         public override void update(RenderWindow _window)
@@ -57,8 +68,46 @@ namespace Titan
             if (mState == AIState.Chase)
                 chase();
 
-            if (ConvertUnits.ToDisplayUnits(mBody.Position.Y) > 800)
-                mBody.Position = ConvertUnits.ToSimUnits(300f, 680f);
+            if (mDie.ElapsedMilliseconds > 30000)
+            {
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 0);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 45);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 90);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 135);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 180);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 225);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 275);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 315);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 0);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 12);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 33);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 135);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 25);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 200);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 128);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 357);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 23);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 368);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 54);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 262);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 231);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 123);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 324);
+                destroy();
+            }
+
+            if (mTimer.ElapsedMilliseconds > 2000)
+            {
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 0);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 45);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 90);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 135);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 180);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 225);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 275);
+                mWorld.createBullet(mPosition, this, "resources/fire.png", 315);
+                mTimer.Restart();
+            }
 
             addPosition(mMovement.X, mMovement.Y);
             mBody.Position = ConvertUnits.ToSimUnits(mPosition.X, mPosition.Y);
