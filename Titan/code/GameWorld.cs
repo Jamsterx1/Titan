@@ -19,6 +19,7 @@ namespace Titan
         public World mPhysics;
 
         public Spawner mSpawner = new Spawner(640f, 360f);
+        public Player mPlayerRef;
 
         public GameWorld()
         {
@@ -79,10 +80,22 @@ namespace Titan
             );
         }
 
+        public void createBullet(Vector2f _position, double angle)
+        {
+            Bullet bullet = new Bullet(mPlayerRef.mPosition, new Vector2f((float)Math.Cos(angle) * (50f * Delta.mDelta), (float)Math.Sin(angle) * (50f * Delta.mDelta)), "../../resources/bullet.png");
+            bullet.createBody(mPhysics, BodyType.Dynamic);
+
+            bullet.mBody.IgnoreCollisionWith(mPlayerRef.mBody);
+            /*mPlayerRef.mBody.IgnoreCollisionWith(bullet.mBody);*/
+
+            mEntities.Add(bullet);
+            sort();
+        }
+
         public void createWorld()
         {
             // Create all platforms, enemies, player and other stuff here
-            Player player = new Player(new Vector2f(200f, 200f), "../../resources/player.png");
+            Player player = new Player(new Vector2f(200f, 200f), "../../resources/player.png", this);
             player.createBody(mPhysics, BodyType.Dynamic);
 
             Entity floor1 = new Entity(new Vector2f(0f, 710f), "../../resources/floor.png");
@@ -136,6 +149,7 @@ namespace Titan
             mEntities.Add(platform10);
 
             sort();
+            mPlayerRef = player;
             mSpawner.create(player, this, mPhysics);
         }
     }

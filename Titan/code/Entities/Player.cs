@@ -24,16 +24,25 @@ namespace Titan
         public bool       mInvicible;
         private bool      mOnce;
         private Stopwatch mTimer;
+        private Stopwatch mShoot;
 
-        public Player(Vector2f _position, String _file)
+        private GameWorld  mWorld;
+
+        public Player(Vector2f _position, String _file, GameWorld _world)
         {
             create(_position, _file, 1);
-            mHealth  = 100;
-            mSegment = 10;
+            mWorld      = _world;
+
+            mEntityType = EntityType.Player;
+            mHealth     = 100;
+            mSegment    = 10;
 
             mInvicible = false;
             mOnce      = false;
             mTimer     = new Stopwatch();
+
+            mShoot     = new Stopwatch();
+            mShoot.Start();
 
             for (int i = 0; i < 11; i++)
             {
@@ -50,12 +59,13 @@ namespace Titan
         public override void createBody(World _physics, BodyType _type)
         {
             base.createBody(_physics, _type);
+            mBody.UserData = this;
             mBody.FixedRotation = true;
         }
 
         public override void update(RenderWindow _window)
         {
-            input();
+            input(_window);
             base.update(_window);
 
             if (ConvertUnits.ToDisplayUnits(mBody.Position.Y) > 800)
@@ -106,7 +116,7 @@ namespace Titan
             }
         }
 
-        public override void input()
+        public override void input(RenderWindow _window)
         {
             if (Keyboard.IsKeyPressed(Keyboard.Key.A))
             {
@@ -134,13 +144,28 @@ namespace Titan
                 if (mPosition.X > 0 && mPosition.X < 1280)
                     mBody.ApplyLinearImpulse(new Vector2(0f, -0.9f * Delta.mDelta));
             }
+
+            if (Mouse.IsButtonPressed(Mouse.Button.Left))
+            {
+                if (mShoot.ElapsedMilliseconds > 250)
+                {
+                    Vector2i mousePos   = Mouse.GetPosition(_window);
+                    Vector2f translated = _window.MapPixelToCoords(mousePos, _window.GetView());
+                    Vector2f aim        = new Vector2f(translated.X - mPosition.X, translated.Y - mPosition.Y);
+                    double   angle      = Math.Atan2(aim.Y, aim.X);
+
+                    mWorld.createBullet(mPosition, angle);
+                    mShoot.Restart();
+                }
+            }
         }
 
         public void invincible()
         {
-            mTimer.Start();
             mInvicible = true;
-            mOnce = true;
+            mOnce      = true;
+            mHealth    = 100;
+            mTimer.Start();
         }
     }
 }

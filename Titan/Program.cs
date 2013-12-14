@@ -12,6 +12,7 @@ namespace Titan
 
             game.createWorld();
             window.Closed += (sender, eventArgs) => window.Close();
+            window.SetFramerateLimit(60);
 
             while (window.IsOpen())
             {

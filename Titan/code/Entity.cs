@@ -9,6 +9,7 @@ using SFML.Window;
 /* Other libs */
 using FarseerPhysics;
 using FarseerPhysics.Dynamics;
+using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 using Microsoft.Xna.Framework;
 
@@ -27,7 +28,8 @@ namespace Titan
         {
             Default = 0,
             Player,
-            Enemy
+            Enemy,
+            Bullet
         };
 
         public Vector2f mPosition;
@@ -55,13 +57,14 @@ namespace Titan
             mSprite = new Sprite(tex);
 
             mEntityType = EntityType.Default;
-            mBody = null;
-            mLayer = _layer;
-            mLifeState = LifeState.LifeState_Active;
-            mPosition = _position;
+            mBody       = null;
+            mLayer      = _layer;
+            mLifeState  = LifeState.LifeState_Active;
+            mPosition   = _position;
+
             mSprite.Position = mPosition;
-            mDimensions = tex.Size;
-            mOrigin = new Vector2f(mPosition.X + (mDimensions.X / 2), mPosition.Y + (mDimensions.Y / 2));
+            mDimensions      = tex.Size;
+            mOrigin          = new Vector2f(mPosition.X + (mDimensions.X / 2), mPosition.Y + (mDimensions.Y / 2));
         }
 
         public virtual void update(RenderWindow _window)
@@ -81,7 +84,7 @@ namespace Titan
                 _window.Draw(mSprite);
         }
 
-        public virtual void input()
+        public virtual void input(RenderWindow _window)
         {
         }
 
@@ -115,6 +118,11 @@ namespace Titan
             mOrigin.X = mPosition.X + (mDimensions.X / 2);
             mOrigin.Y = mPosition.Y + (mDimensions.Y / 2);
             mSprite.Position = mPosition;
+        }
+
+        public virtual bool collision(Fixture f1, Fixture f2, Contact contact)
+        {
+            return true;
         }
 
         /* Life Control Functions */

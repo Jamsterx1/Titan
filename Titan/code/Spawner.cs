@@ -62,7 +62,7 @@ namespace Titan
             newPos.Y = mPosition.Y + randY;
 
             Enemy enemy = new Enemy(newPos, "../../resources/enemy.png", mPlayer);
-            enemy.createBody(mPhysicsWorld, BodyType.Static);
+            enemy.createBody(mPhysicsWorld, BodyType.Dynamic);
             return enemy;
         }
 
