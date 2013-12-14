@@ -29,7 +29,8 @@ namespace Titan
             Default = 0,
             Player,
             Enemy,
-            Bullet
+            Bullet,
+            Boss
         };
 
         public Vector2f mPosition;
@@ -129,7 +130,11 @@ namespace Titan
         /* Life Control Functions */
         public void sleep()   { mLifeState = LifeState.LifeState_Dazed;  }
         public void wake()    { mLifeState = LifeState.LifeState_Active; }
-        public void destroy() { mLifeState = LifeState.LifeState_Dead;   }
+        public void destroy() 
+        { 
+            mLifeState    = LifeState.LifeState_Dead;
+            mBody.Enabled = false;
+        }
 
         public bool isDead()
         {

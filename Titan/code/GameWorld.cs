@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using Titan;
 using SFML.Graphics;
 using SFML.Window;
@@ -18,18 +19,29 @@ namespace Titan
     {
         private static readonly Color CornflowerBlue = new Color(100, 149, 237);
         public List<Entity> mEntities;
+        public List<Enemy> mEnemies;
         public World mPhysics;
 
         public Spawner mSpawner = new Spawner(640f, 360f);
-        public Player mPlayerRef;
+        public Player  mPlayerRef;
+        public bool    mWin;
+
+        public Stopwatch mCountdown = new Stopwatch();
+        public bool mBossSpawned    = false;
+        private static Font mFont   = new Font("resources/Doodle.ttf");
+        public Text mTimeText       = new Text("10:00", mFont, 36);
 
         public GameWorld()
         {
             mEntities = new List<Entity>();
+            mEnemies  = new List<Enemy>();
             mPhysics  = new World(new Vector2(0f, 0.0981f));
+            mWin      = false;
+            mTimeText.Position = new Vector2f(580f, 670f);
 
             ConvertUnits.SetDisplayUnitToSimUnitRatio(8f);
             Delta.create();
+            mCountdown.Start();
         }
 
         public void update(RenderWindow _window)
@@ -38,8 +50,31 @@ namespace Titan
             Delta.update();
             mPhysics.Step(Delta.mDelta);
 
-            if(mEntities.Count < 100)
+            if (mCountdown.ElapsedMilliseconds < 2000/*120000*/ && mEntities.Count < 100 && !mBossSpawned)
+            {
                 mSpawner.update();
+                int elapsed = (int)((2000/*120000*/ - mCountdown.ElapsedMilliseconds) / 1000f);
+                int mins = elapsed / 60;
+                int seconds = elapsed - (mins * 60);
+
+                String timeText = mins + ":" + seconds;
+                mTimeText.DisplayedString = timeText;
+            }
+            else if (mCountdown.ElapsedMilliseconds > 2000/*120000*/)
+            {
+                if (!mBossSpawned)
+                {
+                    // Spawn boss
+                    destroyEnemies();
+                    mCountdown.Reset();
+                    mBossSpawned = true;
+
+                    Boss boss = new Boss(new Vector2f(440f, 320f), "resources/boss.png", mPlayerRef, this);
+                    boss.createBody(mPhysics, BodyType.Dynamic);
+                    mEnemies.Add(boss);
+                    sort();
+                }
+            }
 
             // World Update
             for (int i = 0; i < mEntities.Count; i++)
@@ -51,13 +86,33 @@ namespace Titan
                     mEntities.RemoveAt(i);
                 }
             }
+
+            for (int i = 0; i < mEnemies.Count; i++)
+            {
+                mEnemies[i].update(_window);
+                if (mEnemies[i].isDead())
+                {
+                    mEnemies[i] = null;
+                    mEnemies.RemoveAt(i);
+                }
+            }
         }
 
         public void render(RenderWindow _window)
         {
             _window.Clear(CornflowerBlue);
-            for (int i = 0; i < mEntities.Count; i++)
-                mEntities[i].render(_window);
+            if (mEntities.Count > 0)
+            {
+                for (int i = 0; i < mEntities.Count; i++)
+                    mEntities[i].render(_window);
+            }
+
+            if (mEnemies.Count > 0)
+            {
+                for (int i = 0; i < mEnemies.Count; i++)
+                    mEnemies[i].render(_window);
+            }
+            _window.Draw(mTimeText);
         }
 
         public void add(Entity _entity)
@@ -66,10 +121,21 @@ namespace Titan
             Console.WriteLine("Entity " + _entity + " added to world");
         }
 
+        public void addEnemy(Enemy _enemy)
+        {
+            mEnemies.Add(_enemy);
+        }
+
         public void addBatch(List<Entity> _entities)
         {
             for (int i = 0; i < _entities.Count; i++)
                 mEntities.Add(_entities[i]);
+        }
+
+        public void destroyEnemies()
+        {
+            for (int i = 0; i < mEnemies.Count; i++)
+                mEnemies[i].destroy();
         }
 
         public void sort()

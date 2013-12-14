@@ -45,14 +45,14 @@ namespace Titan
             if (mTimer.ElapsedMilliseconds >= 5000f)
             {
                 for(int i = 0; i < mCount; i++)
-                    mWorld.add(spawn());
+                    mWorld.addEnemy(spawn());
 
                 mCount += 1;
                 mTimer.Restart();
             }
         }
 
-        public Entity spawn()
+        public Enemy spawn()
         {
             Vector2f newPos = new Vector2f();
             int randX = mRandom.Next(-500, 501);

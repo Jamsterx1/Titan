@@ -30,10 +30,14 @@ namespace Titan
         public Entity   mTarget;
         public Vector2f mMovement;
 
-        public  Random    rand   = new Random();
-        private Stopwatch mTimer = new Stopwatch();
-        private Stopwatch mDie = new Stopwatch();
-        private GameWorld mWorld;
+        public  Random      rand   = new Random();
+        protected Stopwatch mTimer = new Stopwatch();
+        protected Stopwatch mDie   = new Stopwatch();
+        protected GameWorld mWorld;
+
+        public Enemy()
+        {
+        }
 
         public Enemy(Vector2f _position, String _file, Entity _target, GameWorld _world, uint _layer = 2)
         {
@@ -56,7 +60,7 @@ namespace Titan
             mBody.IgnoreCollisionWith(mTarget.mBody);
             mBody.OnCollision += collision;
             mBody.CollisionCategories = Category.Cat2;
-            mBody.CollidesWith = Category.All &~ Category.Cat1;
+            mBody.CollidesWith = Category.All &~ Category.Cat1 &~ Category.Cat2;
         }
 
         public override void update(RenderWindow _window)

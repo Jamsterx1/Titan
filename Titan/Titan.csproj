@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="code\Delta.cs" />
+    <Compile Include="code\Entities\Boss.cs" />
     <Compile Include="code\Entities\Bullet.cs" />
     <Compile Include="code\Entities\Enemy.cs" />
     <Compile Include="code\Entities\Player.cs" />
