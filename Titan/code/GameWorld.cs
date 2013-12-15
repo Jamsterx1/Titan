@@ -39,8 +39,8 @@ namespace Titan
 
         public Stopwatch mCountdown = new Stopwatch();
         public bool mBossSpawned    = false;
-        private static Font mFont   = new Font("resources/Doodle.ttf");
-        public Text mTimeText       = new Text("10:00", mFont, 36);
+        private static Font mFont   = new Font("resources/plasmati.ttf");
+        public Text mTimeText       = new Text("2:00", mFont, 36);
         private Boss mBoss;
 
         public Text mStartInfo = new Text("TITAN\n\n-- Controls --\nAD to move\nSPACE to jump\nEnter for invincibility (one time use)\n\nSpace to begin", mFont, 20);
@@ -58,7 +58,7 @@ namespace Titan
             mWin      = true;
 
             mTimeText.Position  = new Vector2f(580f, 670f);
-            mStartInfo.Position = new Vector2f(300f, 300f);
+            mStartInfo.Position = new Vector2f(500f, 300f);
             mWinText.Position   = new Vector2f(400f, 200f);
             mLoseText.Position  = new Vector2f(400f, 200f);
             //mStartInfo.Color    = new Color(255, 0, 0);
@@ -70,7 +70,7 @@ namespace Titan
 
             mMusic        = new Music("resources/sound/theme.wav");
             mMusic.Loop   = true;
-            mMusic.Volume = 60f;
+            mMusic.Volume = 40f;
             mMusic.Play();
         }
 
