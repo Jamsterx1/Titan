@@ -18,7 +18,7 @@ namespace Titan
 {
     public class Boss : Enemy
     {
-        public Boss(Vector2f _position, String _file, Entity _target, GameWorld _world, uint _layer = 2)
+        public Boss(Vector2f _position, String _file, Entity _target, GameWorld _world, uint _layer = 0)
         {
             create(_position, _file, _layer);
             mHealth     = 1000;
@@ -27,9 +27,16 @@ namespace Titan
             mTarget     = _target;
         }
 
+        public override void createBody(World _physics, BodyType _type)
+        {
+            base.createBody(_physics, _type);
+            mBody.Enabled = true;
+        }
+
         public override void update(RenderWindow _window)
         {
             // Boss Logic
+
         }
 
         public override void render(RenderWindow _window)

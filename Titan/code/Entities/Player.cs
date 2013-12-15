@@ -72,7 +72,11 @@ namespace Titan
             base.update(_window);
 
             if (mHealth == 0)
+            {
                 destroy();
+                mWorld.mWin = false;
+                mWorld.mGameState = GameWorld.GameState.END;
+            }
 
             if (ConvertUnits.ToDisplayUnits(mBody.Position.Y) > 800)
                 mBody.Position = ConvertUnits.ToSimUnits(300f, 680f);

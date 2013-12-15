@@ -128,17 +128,13 @@ namespace Titan
         }
 
         /* Life Control Functions */
-        public void sleep()   { mLifeState = LifeState.LifeState_Dazed;  }
-        public void wake()    { mLifeState = LifeState.LifeState_Active; }
-        public void destroy() 
+        public void sleep()   { mLifeState = LifeState.LifeState_Dazed;        }
+        public void wake()    { mLifeState = LifeState.LifeState_Active;       }
+        public void destroy() { mLifeState    = LifeState.LifeState_Dead;      }
+        
+        public bool isDead()  
         { 
-            mLifeState    = LifeState.LifeState_Dead;
-            mBody.Enabled = false;
-        }
-
-        public bool isDead()
-        {
-            return mLifeState == LifeState.LifeState_Dead;
+            return mLifeState == LifeState.LifeState_Dead; 
         }
     }
 }

@@ -5,9 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Titan;
+
+/* SFML */
 using SFML.Graphics;
 using SFML.Window;
+using SFML.Audio;
 
+/* Other libraries */
 using FarseerPhysics;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
@@ -17,6 +21,13 @@ namespace Titan
 {
     public class GameWorld
     {
+        public enum GameState
+        {
+            START = 0,
+            GAME,
+            END
+        };
+
         private static readonly Color CornflowerBlue = new Color(100, 149, 237);
         public List<Entity> mEntities;
         public List<Enemy> mEnemies;
@@ -30,70 +41,98 @@ namespace Titan
         public bool mBossSpawned    = false;
         private static Font mFont   = new Font("resources/Doodle.ttf");
         public Text mTimeText       = new Text("10:00", mFont, 36);
+        private Boss mBoss;
+
+        public Text mStartInfo = new Text("TITAN\n\n-- Controls --\nAD to move\nSPACE to jump\nEnter for invincibility (one time use)\n\nSpace to begin", mFont, 20);
+        public Text mWinText = new Text("You WIN!", mFont, 40);
+        public Text mLoseText = new Text("You LOSE!", mFont, 40);
+
+        public Music mMusic;
+        public GameState mGameState;
 
         public GameWorld()
         {
             mEntities = new List<Entity>();
             mEnemies  = new List<Enemy>();
             mPhysics  = new World(new Vector2(0f, 0.0981f));
-            mWin      = false;
-            mTimeText.Position = new Vector2f(580f, 670f);
+            mWin      = true;
+
+            mTimeText.Position  = new Vector2f(580f, 670f);
+            mStartInfo.Position = new Vector2f(300f, 300f);
+            mWinText.Position   = new Vector2f(400f, 200f);
+            mLoseText.Position  = new Vector2f(400f, 200f);
+            //mStartInfo.Color    = new Color(255, 0, 0);
 
             ConvertUnits.SetDisplayUnitToSimUnitRatio(8f);
             Delta.create();
             mCountdown.Start();
+            mGameState = GameState.START;
+
+            mMusic        = new Music("resources/sound/theme.wav");
+            mMusic.Loop   = true;
+            mMusic.Volume = 60f;
+            mMusic.Play();
         }
 
         public void update(RenderWindow _window)
         {
-            // Pre-Update
-            Delta.update();
-            mPhysics.Step(Delta.mDelta);
-
-            if (mCountdown.ElapsedMilliseconds < 2000/*120000*/ && mEntities.Count < 100 && !mBossSpawned)
+            if (mGameState == GameState.START)
             {
-                mSpawner.update();
-                int elapsed = (int)((2000/*120000*/ - mCountdown.ElapsedMilliseconds) / 1000f);
-                int mins = elapsed / 60;
-                int seconds = elapsed - (mins * 60);
-
-                String timeText = mins + ":" + seconds;
-                mTimeText.DisplayedString = timeText;
+                if (Keyboard.IsKeyPressed(Keyboard.Key.Space))
+                    mGameState = GameState.GAME;
             }
-            else if (mCountdown.ElapsedMilliseconds > 2000/*120000*/)
+            if(mGameState == GameState.GAME)
             {
-                if (!mBossSpawned)
-                {
-                    // Spawn boss
-                    destroyEnemies();
-                    mCountdown.Reset();
-                    mBossSpawned = true;
+                // Pre-Update
+                Delta.update();
+                mPhysics.Step(Delta.mDelta);
 
-                    Boss boss = new Boss(new Vector2f(440f, 320f), "resources/boss.png", mPlayerRef, this);
-                    boss.createBody(mPhysics, BodyType.Dynamic);
-                    mEnemies.Add(boss);
-                    sort();
+                if (mCountdown.ElapsedMilliseconds < 120000 && mEntities.Count < 100 && !mBossSpawned)
+                {
+                    mSpawner.update();
+                    int elapsed = (int)((120000 - mCountdown.ElapsedMilliseconds) / 1000f);
+                    int mins = elapsed / 60;
+                    int seconds = elapsed - (mins * 60);
+
+                    String timeText = mins + ":" + seconds;
+                    mTimeText.DisplayedString = timeText;
                 }
-            }
-
-            // World Update
-            for (int i = 0; i < mEntities.Count; i++)
-            {
-                mEntities[i].update(_window);
-                if (mEntities[i].isDead())
+                else if (mCountdown.ElapsedMilliseconds > 120000)
                 {
-                    mEntities[i] = null;
-                    mEntities.RemoveAt(i);
+                    /*if (!mBossSpawned)
+                    {
+                        // Spawn boss
+                        destroyEnemies();
+                        mCountdown.Reset();
+                        mBossSpawned = true;
+
+                        mBoss = new Boss(new Vector2f(440f, 310f), "resources/boss.png", mPlayerRef, this, 0);
+                        mBoss.createBody(mPhysics, BodyType.Dynamic);
+                        mEntities.Add(mBoss);
+                        sort();
+                    }*/
+                    mGameState = GameState.END;
                 }
-            }
 
-            for (int i = 0; i < mEnemies.Count; i++)
-            {
-                mEnemies[i].update(_window);
-                if (mEnemies[i].isDead())
+                // World Update
+                for (int i = 0; i < mEntities.Count; i++)
                 {
-                    mEnemies[i] = null;
-                    mEnemies.RemoveAt(i);
+                    mEntities[i].update(_window);
+                    if (mEntities[i].isDead())
+                    {
+                        mEntities[i] = null;
+                        mEntities.RemoveAt(i);
+                    }
+                }
+
+                for (int i = 0; i < mEnemies.Count; i++)
+                {
+                    mEnemies[i].update(_window);
+                    if (mEnemies[i].isDead())
+                    {
+                        mEnemies[i] = null;
+                        mEnemies.RemoveAt(i);
+                    }
                 }
             }
         }
@@ -113,6 +152,16 @@ namespace Titan
                     mEnemies[i].render(_window);
             }
             _window.Draw(mTimeText);
+
+            if (mGameState == GameState.START)
+                _window.Draw(mStartInfo);
+            else if (mGameState == GameState.END)
+            {
+                if (mWin)
+                    _window.Draw(mWinText);
+                else
+                    _window.Draw(mLoseText);
+            }
         }
 
         public void add(Entity _entity)
